@@ -1,0 +1,3 @@
+[submodule "tas"]
+	path = tas
+	url = https://github.com/hc0d3r/tas
